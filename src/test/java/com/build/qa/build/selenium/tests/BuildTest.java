@@ -5,10 +5,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
 
 import com.build.qa.build.selenium.framework.BaseFramework;
@@ -21,6 +26,22 @@ import com.build.qa.build.selenium.pageobjects.homepage.HomePage;
  ***********************************************************************************************************************/
 
 public class BuildTest extends BaseFramework {
+	WebDriver chromeDriver;
+	WebDriver firefoxDriver;
+	
+	@Before
+	public void setUp() {
+		chromeDriver = driver;
+		System.setProperty("webdriver.gecko.driver", "/Users/brianthomas/webDriver/geckodriver");
+		firefoxDriver = new FirefoxDriver();
+		
+	}
+	
+	@After
+	public void teadDown() {
+		chromeDriver = driver;
+		firefoxDriver.quit();
+	}
 
 	/**
 	 * Extremely basic test that outlines some basic functionality and page objects
@@ -56,6 +77,13 @@ public class BuildTest extends BaseFramework {
 		
 		
 		/* this is testing my own site, due to the captcha on build.com */
+		for(int i = 0; i < 2; i++) {
+			if(i == 1) {
+				driver = chromeDriver;
+			}
+			else {
+				driver = firefoxDriver;
+			}
 		String currentURL = null;
 		String startURL = "http://18.220.25.115:8080/LostTeams/";
 		String hockeySearchTerm = "Dead and Relocated Teams";
@@ -70,7 +98,8 @@ public class BuildTest extends BaseFramework {
 		System.out.println(currentURL);
 		
 		assertTrue(heading.getText().equalsIgnoreCase(hockeySearchTerm));
-
+		}
+		
 	}
 
 	/**
@@ -102,18 +131,27 @@ public class BuildTest extends BaseFramework {
 		 * I couldn't test the above, so this is a rough equivalent on amazon.com   *
 		 * **************************************************************************/
 		
+		for(int i = 0; i < 2; i++) {
+			if(i == 1) {
+				driver = chromeDriver;
+			}
+			else {
+				driver = firefoxDriver;
+			}
 		String startUrl = "https://www.amazon.com/computer-video-games-hardware-accessories/b/ref=nav_shopall_cvg?ie=UTF8&node=468642";
 		driver.get(startUrl);
 		
-		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+//		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 		driver.findElement(By.cssSelector("a[href*='6469269011']")).click();
-		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+//		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 		driver.findElement(By.cssSelector("a[title*='Call of Duty: WWII - Xbox One Standard Edition']")).click();
 		driver.findElement(By.id("add-to-cart-button")).click();
-		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+//		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 		driver.findElement(By.id("smartShelfAddToCartNative")).click();
 		WebElement cartItem = driver.findElement(By.cssSelector(".a-size-medium.sc-product-title.a-text-bold"));
 		assertTrue(cartItem.getText().contains("Call of Duty"));
+		driver.quit();
+		}
 	}
 
 	/**
@@ -211,6 +249,5 @@ public class BuildTest extends BaseFramework {
 
 //		driver.get("http://18.220.25.115:8080/scotch-tracker/#/add");
 //		driver.findElement(By.xpath("//label[@for='type']"));
-//		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 	}
 }
