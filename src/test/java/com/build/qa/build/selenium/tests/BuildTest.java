@@ -9,12 +9,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.build.qa.build.selenium.framework.BaseFramework;
 import com.build.qa.build.selenium.pageobjects.homepage.HomePage;
@@ -50,6 +52,14 @@ public class BuildTest extends BaseFramework {
 	@Test
 	public void navigateToHomePage() {
 		
+		/* calling both browsers fails */
+//		for(int i = 0; i < 2; i++) {
+//			if(i == 1) {
+//				driver = chromeDriver;
+//			}
+//			else {
+//				driver = firefoxDriver;
+//			}
 		/* This worked before the captcha started, so I assume it still passes and didn't rewrite it for another site */
 		
 		driver.get(getConfiguration("HOMEPAGE"));
@@ -57,6 +67,7 @@ public class BuildTest extends BaseFramework {
 
 		softly.assertThat(homePage.onBuildTheme()).as("The website should load up with the Build.com desktop theme.")
 				.isTrue();
+//		}
 	}
 
 	/**
@@ -209,8 +220,8 @@ public class BuildTest extends BaseFramework {
 	 */
 	@Test
 	public void facetNarrowBysResultInCorrectProductCounts() {
-//		String startUrl = "https://www.build.com/bathroom-sink-faucets/c108503";
-		String startUrl = "https://www.build.com";
+		String startUrl = "https://www.build.com/bathroom-sink-faucets/c108503";
+//		String startUrl = "https://www.build.com";
 		driver.get(startUrl);
 		
 		Actions action = new Actions(driver);
@@ -220,30 +231,51 @@ public class BuildTest extends BaseFramework {
 //		WebElement bathItem = driver.findElement(By.cssSelector("li[data-category-id*='108412']"));
 
 //		Hover and then click on newly visible item
-		WebElement bathItem = driver.findElement(By.cssSelector("a[href*='/bathroom/c108412']"));
-		action.moveToElement(bathItem).moveToElement(driver.findElement(By.cssSelector("a[href*='bathroom-sink-faucets/c108503']"))).click();
+		driver.manage().timeouts().implicitlyWait(35, TimeUnit.SECONDS);
+//		WebElement bathItem = driver.findElement(By.cssSelector("a[href*='/bathroom/c108412']"));
+//		action.moveToElement(bathItem).moveToElement(driver.findElement(By.cssSelector("a[href*='bathroom-sink-faucets/c108503']"))).click();
+//		driver.findElement(By.cssSelector("a[href*='bathroom-sink-faucets/c108503']")).click();
 		
 //		Get number of products
 		WebElement prodNum = driver.findElement(By.className("js-num-results"));
-		Integer total = Integer.valueOf(prodNum.getText());
+		Integer total = Integer.parseInt(prodNum.getText().replaceAll(",", ""));
+		System.out.println("total: " + total);
 		
 //		Tick box, wait for reload, tick second box
-		driver.findElement(By.cssSelector(".sub-item.qa-facetGroup-Theme-facetValue-Modern"));
 		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-		driver.findElement(By.cssSelector(".sub-item.qa-facetGroup-Colors-facetValue-Brass Tones"));
+		WebElement modernCheckBox = driver.findElement(By.cssSelector("input[value*='/bathroom-sink-faucets/c108503?p=1&f19793=modern']"));
 		
+		((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", modernCheckBox);
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 //		Wait for reload and get new reduced total
-		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+//		Actions actions = new Actions(driver);
+//		actions.moveToElement(modernCheckBox).click().perform(); // this might not be clicking the box
+
+//		modernCheckBox = driver.findElement(By.cssSelector("input[value*='/bathroom-sink-faucets/c108503?p=1&f19793=modern']"));
+		wait.until(ExpectedConditions.visibilityOf(modernCheckBox));
+		modernCheckBox.click(); 	// seems the click isn't causing the refresh to occur
+		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+		driver.navigate().refresh();
 		WebElement prodNum1 = driver.findElement(By.className("js-num-results"));
-		Integer total1 = Integer.valueOf(prodNum1.getText());
+		
+		wait.until(ExpectedConditions.visibilityOf(prodNum1));
+		System.out.println(prodNum1.getText());
+		Integer total1 = Integer.parseInt(prodNum1.getText().replaceAll(",", ""));
 		
 //		ensure num of prods is less
+		System.out.println("total: " + total + ", total1: " + total1);
+		// fails here as total1 is not being grabbed as the new reduced total
 		assertTrue(total > total1);
 		
 //		Wait a second time for reload and get new reduced total again
+		driver.findElement(By.cssSelector(".sub-item.qa-facetGroup-Colors-facetValue-Brass.Tones"));
 		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 		WebElement prodNum2 = driver.findElement(By.className("js-num-results"));
-		Integer total2 = Integer.valueOf(prodNum2.getText());
+		Integer total2 = Integer.valueOf(prodNum2.getText().replaceAll(",", ""));
 
 		assertTrue(total1 > total2);
 
