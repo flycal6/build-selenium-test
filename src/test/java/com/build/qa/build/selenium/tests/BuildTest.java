@@ -137,7 +137,8 @@ public class BuildTest extends BaseFramework {
 		assertEquals("https://www.build.com/bathroom-sinks/c108504", currentUrl);
 		
 		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-		driver.findElement(By.cssSelector("a[href*='kohler-k-2355-bathroom-sink/s560600']")).click();
+		
+		driver.findElement(By.cssSelector("a[href*='kohler-k-2355-bathroom-sink']")).click();
 		
 		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 		driver.findElement(By.className("add-to-cart")).click();
@@ -152,10 +153,10 @@ public class BuildTest extends BaseFramework {
 		
 		driver.findElement(By.cssSelector(".button-primary.button.js-email-cart-submit-button")).click();
 		
-		/*
-		 *  I missed the success modal popup and I didn't want to spam you with a bunch of emails trying to find it, 
-		 *  so no assert for this one. 
-		 */
+		/*************************************************************************************************************
+		 *  I missed the success modal popup and I didn't want to spam you with a bunch of emails trying to find it, *
+		 *  so no assert for this one.                                                                               *
+		 *************************************************************************************************************/
 //		
 	}
 
@@ -170,25 +171,33 @@ public class BuildTest extends BaseFramework {
 	 */
 	@Test
 	public void facetNarrowBysResultInCorrectProductCounts() {
+//		String startUrl = "https://www.build.com/bathroom-sink-faucets/c108503";
+		String startUrl = "https://www.build.com";
+		driver.get(startUrl);
+		
+		Actions action = new Actions(driver);
+		
+		// this is not a valid selector and fails; should probably use xpath, but the captcha came back
+		//before I could see what works
+//		WebElement bathItem = driver.findElement(By.cssSelector("li[data-category-id*='108412']"));
 
 //		Hover and then click on newly visible item
-		Actions action = new Actions(driver);
-		WebElement bathItem = driver.findElement(By.cssSelector("li[data-category-id*='108412']"));
+		WebElement bathItem = driver.findElement(By.cssSelector("a[href*='/bathroom/c108412']"));
 		action.moveToElement(bathItem).moveToElement(driver.findElement(By.cssSelector("a[href*='bathroom-sink-faucets/c108503']"))).click();
+		
+//		Get number of products
+		WebElement prodNum = driver.findElement(By.className("js-num-results"));
+		Integer total = Integer.valueOf(prodNum.getText());
 		
 //		Tick box, wait for reload, tick second box
 		driver.findElement(By.cssSelector(".sub-item.qa-facetGroup-Theme-facetValue-Modern"));
 		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 		driver.findElement(By.cssSelector(".sub-item.qa-facetGroup-Colors-facetValue-Brass Tones"));
-
-//		Get number of products
-		WebElement prodNum = driver.findElement(By.className("js-num-results"));
-		Integer total = Integer.valueOf(prodNum.getText());
 		
 //		Wait for reload and get new reduced total
 		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 		WebElement prodNum1 = driver.findElement(By.className("js-num-results"));
-		Integer total1 = Integer.valueOf(prodNum.getText());
+		Integer total1 = Integer.valueOf(prodNum1.getText());
 		
 //		ensure num of prods is less
 		assertTrue(total > total1);
@@ -196,7 +205,7 @@ public class BuildTest extends BaseFramework {
 //		Wait a second time for reload and get new reduced total again
 		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 		WebElement prodNum2 = driver.findElement(By.className("js-num-results"));
-		Integer total2 = Integer.valueOf(prodNum.getText());
+		Integer total2 = Integer.valueOf(prodNum2.getText());
 
 		assertTrue(total1 > total2);
 
