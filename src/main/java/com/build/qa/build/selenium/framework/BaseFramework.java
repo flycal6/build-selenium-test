@@ -47,24 +47,26 @@ public abstract class BaseFramework {
 	@Before
 	public void setUpBefore() {
 		DesiredCapabilities capabilities;
-		// Which driver to use? 
+		// Which driver to use?
 		if (DRIVER_CHROME.equalsIgnoreCase(configuration.getProperty("BROWSER"))) {
+			System.setProperty("webdriver.chrome.driver", "/Users/brianthomas/webDriver/chromedriver");
 			capabilities = DesiredCapabilities.chrome();
 			driver = new ChromeDriver(capabilities);
 		} else if (DRIVER_FIREFOX.equalsIgnoreCase(configuration.getProperty("BROWSER"))) {
-			capabilities = DesiredCapabilities.firefox();
+			System.setProperty("webdriver.gecko.driver", "/Users/brianthomas/webDriver/geckodriver");
+			 capabilities = DesiredCapabilities.firefox();
 			driver = new FirefoxDriver(capabilities);
 		}
 		// Define fluent wait
-		wait = new FluentWait<WebDriver>(driver).withTimeout(15, TimeUnit.SECONDS).pollingEvery(500, TimeUnit.MILLISECONDS)
-				.ignoring(NoSuchElementException.class);
+		wait = new FluentWait<WebDriver>(driver).withTimeout(30, TimeUnit.SECONDS)
+				.pollingEvery(500, TimeUnit.MILLISECONDS).ignoring(NoSuchElementException.class);
 	}
 
 	protected WebDriver getDriver() {
 		return driver;
 	}
-	
-	protected String getConfiguration(String config) { 
+
+	protected String getConfiguration(String config) {
 		return configuration.getProperty(config);
 	}
 
